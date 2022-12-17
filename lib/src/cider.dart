@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:cider/cider.dart';
+import 'package:cider/console.dart';
 import 'package:cider/src/cider_command.dart';
 import 'package:cider/src/service/changelog_service.dart';
 import 'package:cider/src/service/pubspec_service.dart';
@@ -12,18 +13,17 @@ import 'package:path/path.dart';
 
 class Cider {
   Cider(
-      {Iterable<void Function(Cider cider)> plugins = const [],
-      String name = 'cider',
+      {String name = 'cider',
       String description = 'Dart package release tools.',
-      io.Directory? root})
-      : _runner = CommandRunner<CiderCommand>(name, description) {
+      io.Directory? root,
+      Console? console})
+      : _console = console ?? StdConsole(),
+        _runner = CommandRunner<CiderCommand>(name, description) {
+    console = StdConsole();
+    _di.provide<Console>((_) => _console);
     _di.provide((_) => _findRoot(root ?? io.Directory.current), name: 'root');
-    _di.provide<io.Stdout>((_) => io.stdout);
-    _di.provide<io.Stdout>((_) => io.stderr, name: 'stderr');
-    [
-      PubspecService.install,
-      ChangelogService.install,
-    ].followedBy(plugins).forEach((install) => install(this));
+    PubspecService.install(this);
+    ChangelogService.install(this);
   }
 
   /// Finds the project root by locating 'pubspec.yaml'.
@@ -42,6 +42,8 @@ class Cider {
   final _di = Container();
   final _handler = <CiderCommand, Handler>{};
   final CommandRunner<CiderCommand> _runner;
+
+  final Console _console;
 
   /// Adds a new service to be available for other services and handlers
   /// Some of the built-in services are:
@@ -72,8 +74,8 @@ class Cider {
       }
       return 0;
     } on Error catch (e) {
-      _di.get<io.Stdout>('stderr').writeln(e);
-      _di.get<io.Stdout>('stderr').writeln(e.stackTrace);
+      _console.err.writeln(e);
+      _console.err.writeln(e.stackTrace);
       return exitException;
     }
   }

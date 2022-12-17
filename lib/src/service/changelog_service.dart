@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:change/change.dart';
+import 'package:cider/console.dart';
 import 'package:cider/src/cider.dart';
 import 'package:cider/src/cider_command.dart';
 import 'package:cider/src/service/pubspec_service.dart';
@@ -25,7 +26,7 @@ class ChangelogService {
     cider.addCommand(_DescribeCommand(), (args, get) {
       final version = args.rest.isEmpty ? null : args.rest.first;
       final section = get<ChangelogService>().describe(version);
-      get<Stdout>().writeln(section);
+      get<Console>().out.writeln(section);
       return null;
     });
 
@@ -34,7 +35,7 @@ class ChangelogService {
       final parsedDate =
           date == 'today' ? DateTime.now() : DateTime.parse(date);
       final release = get<ChangelogService>().release(parsedDate);
-      get<Stdout>().writeln(release);
+      get<Console>().out.writeln(release);
       return null;
     });
   }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cider/console.dart';
 import 'package:cider/src/cider.dart';
 import 'package:cider/src/cider_command.dart';
 import 'package:path/path.dart';
@@ -32,7 +33,7 @@ class PubspecService {
         final version = Version.parse(args.rest.first);
         get<PubspecService>().writeVersion(version);
       }
-      get<Stdout>().writeln(get<PubspecService>().readVersion());
+      get<Console>().out.writeln(get<PubspecService>().readVersion());
       return null;
     });
 
@@ -46,7 +47,7 @@ class PubspecService {
           bumpBuild: args['bump-build'],
           build: args['build'],
           pre: args['pre']);
-      get<Stdout>().writeln(result);
+      get<Console>().out.writeln(result);
       return null;
     });
   }

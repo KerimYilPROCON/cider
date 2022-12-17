@@ -1,15 +1,14 @@
 import 'dart:io';
 
 import 'package:cider/cider.dart';
+import 'package:cider/console.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
-
-import 'src/testing.dart';
 
 void main() {
   late Directory temp;
   late Cider cider;
-  late MockStdout out, err;
+  late BufferSink out, err;
   setUp(() async {
     temp = await Directory.systemTemp.createTemp();
     await Directory('test/template').list().forEach((element) {
@@ -17,11 +16,9 @@ void main() {
         element.copy(join(temp.path, basename(element.path)));
       }
     });
-    out = MockStdout();
-    err = MockStdout();
-    cider = Cider(root: temp);
-    cider.provide<Stdout>((_) => out);
-    cider.provide<Stdout>((_) => err, name: 'stderr');
+    out = BufferSink();
+    err = BufferSink();
+    cider = Cider(root: temp, console: Console(out, err));
   });
 
   tearDown(() async {
